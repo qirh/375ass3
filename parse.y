@@ -50,6 +50,7 @@
 #include "lexan.h"
 #include "symtab.h"
 #include "parse.h"
+#include <string.h>
 
         /* define the type of the Yacc stack element to be TOKEN */
 
@@ -82,38 +83,33 @@ TOKEN parseresult;
   id_list   : IDENTIFIER COMMA id_list                 { printf("1 id_list\n"); $$ = cons($1, $3); }
             | IDENTIFIER                               { printf("2 id_list\n"); $$ = cons($1, NULL); }
             ;
-  statement_list : statement SEMICOLON statement_list  { printf("1 statement_list\n"); $$ = cons($1, $3); }
-                 |   statement                         { printf("2 statement_list\n"); $$ = $1; }
-                 ;
-  vargroup  : id_list COLON type                       { printf("1 varspecs\n"); $$ = $3; }
-            ;
-  varspecs  : vargroup SEMICOLON varspecs              { printf("1 varspecs\n"); $$ = $3; }
-            | vargroup SEMICOLON                       { printf("2 varspecs\n"); $$ = $1; }
+  vargroup  : id_list COLON type                       { printf("1 vargroup\n"); instvars($1, $3); }
             ;  
-  cdef_list : IDENTIFIER EQ NUMBER SEMICOLON cdef_list { printf("1 cdef_list\n"); instconstant($1, $3); }
-            | IDENTIFIER EQ NUMBER SEMICOLON           { printf("2 cdef_list\n"); instconstant($1, $3); }
+  cdef_list : IDENTIFIER EQ NUMBER SEMICOLON cdef_list { printf("1 cdef_list\n"); $$ = $3; }
+            | IDENTIFIER EQ NUMBER SEMICOLON           { printf("2 cdef_list\n"); $$ = $1; }
             ;
   type      : simple_type                              { printf("1 type\n"); $$ = $1; }
             | ARRAY LBRACKET simple_type_list RBRACKET OF type { printf("2 type\n"); $$ = NULL; }
-            | RECORD field_list END                    { printf("3 type\n"); $$ = instrec($1, $2); }
+            //| RECORD field_list END                    { printf("3 type\n"); $$ = instrec($1, $2); }
             | POINT IDENTIFIER                         { printf("4 type\n"); $$ = NULL; }
+            ;  
+  simple_type:IDENTIFIER                               { printf("1 simple_type\n"); $$ = findtype($1); }
+            | LPAREN id_list RPAREN                    { printf("2 simple_type\n"); $$ = NULL; }
+            | NUMBER DOTDOT NUMBER /*NUMBER|constant?*/{ printf("3 simple_type\n"); $$ = NULL; }
             ;
-  field_list: id_list COLON type                        { printf("1 field_list\n"); $$ = NULL; }
-            | id_list COLON type SEMICOLON field_list   { printf("2 field_list\n"); $$ = nconc($1, $5); }
-            | /* empty */                               { printf("3 field_list\n"); $$ = NULL; }
-            ;   
-  simple_type:IDENTIFIER                                { printf("1 simple_type\n"); $$ = findtype($1); }
-            | LPAREN id_list RPAREN                     { printf("2 simple_type\n"); $$ = NULL; }
-            | NUMBER DOTDOT NUMBER /*NUMBER|constant?*/ { printf("3 simple_type\n"); $$ = NULL; }
-            ;
-  simple_type_list : simple_type COMMA simple_type_list  { printf("1 simple_type_list\n"); $$ = cons($3, $1); }
-                   | simple_type                         { printf("2 simple_type_list\n"); $$ = $1; }
+  simple_type_list : simple_type COMMA simple_type_list{ printf("1 simple_type_list\n"); $$ = cons($3, $1); }
+                   | simple_type                       { printf("2 simple_type_list\n"); $$ = $1; }
                    ;
   block     : BEGINBEGIN statement endpart             { printf("1 block\n"); $$ = makeprogn($1, cons($2, $3)); }
             ;
   vblock    : VAR varspecs  block                      { printf("1 vblock\n"); $$ = $3; }
             | block                                    { printf("2 vblock\n"); $$ = $1; }
-            ;           
+            ; 
+  varspecs :  vargroup SEMICOLON varspecs              { printf("1 varspecs\n"); }
+           |  vargroup SEMICOLON                       { printf("2 varspecs\n"); }
+           ;
+  vargroup :  id_list COLON type
+                            { instvars($1, $3); }
   lblock    : CONST cdef_list vblock                   { printf("1 lblock\n"); $$ = $3;}       
             | vblock                                   { printf("2 lblock\n"); $$ = $1;} 
             ;
@@ -122,15 +118,12 @@ TOKEN parseresult;
             | IDENTIFIER LPAREN args RPAREN            { printf("5 statement\n"); $$ = makefuncall($2, $1, $3); }
             | BEGINBEGIN statement endpart             { printf("6 statement\n"); $$ = makeprogn($1, cons($2, $3)); }
             | IF expr THEN statement endif             { printf("7 statement\n"); $$ = makeif($1, $2, $4, $5); }
-            | WHILE expr DO statement                  { printf("8 statement\n"); $$ = makewhile($1, $2, $3, $4); }
-            | REPEAT statement_list UNTIL expr         { printf("9 statement\n"); $$ = makerepeat($1, $2, $3, $4); } //just 2??
-            | FOR assignment TO expr DO statement      { printf("A statement\n"); $$ = makefor(+1, $1, $2, $3, $4, $5, $6); }    //+?
-            | FOR assignment DOWNTO expr DO statement  { printf("B statement\n"); $$ = makefor(-1, $1, $2, $3, $4, $5, $6); }
-            | GOTO NUMBER                              { printf("C statement\n"); $$ = dogoto($1, $2); }
-            | /* empty */                              { printf("D statement\n"); $$ = NULL; }
+            | FOR assignment TO expr DO statement      { printf("8 statement\n"); $$ = makefor(+1, $1, $2, $3, $4, $5, $6); }    //+?
+            | FOR assignment DOWNTO expr DO statement  { printf("9 statement\n"); $$ = makefor(-1, $1, $2, $3, $4, $5, $6); }
+            | /* empty */                              { printf("A statement\n"); $$ = NULL; }
             ;
   endpart   : SEMICOLON statement endpart              { printf("1 endpart\n"); $$ = cons($2, $3); }
-            | END                                      { printf("1 endpart\n"); $$ = NULL; }
+            | END                                      { printf("2 endpart\n"); $$ = NULL; }
             ;
   endif     : ELSE statement                           { printf("1 endif\n"); $$ = $2; }
             | /* empty */                              { printf("2 endif\n"); $$ = NULL; }
@@ -143,7 +136,7 @@ TOKEN parseresult;
             | expr EQ sexpr                            { printf("4 expr\n"); $$ = binop($2, $1, $3); }
             | sexpr                                    { printf("5 expr\n"); $$ = $1; }
             ;
-  sexpr     : MINUS term                               { printf("1 sexpr\n"); $$ = onenop($1, $2); }
+  sexpr     : MINUS term                               { printf("1 sexpr\n"); $$ = unaryop($1, $2); }
             | term                                     { printf("2 sexpr\n"); $$ = $1; }
             ;
   term      : factor TIMES factor                      { printf("1 term\n"); $$ = binop($2, $1, $3); }
@@ -172,7 +165,7 @@ TOKEN parseresult;
    are working.
   */
 
-#define DEBUG        31             /* set bits here for debugging, 0 = off  */
+#define DEBUG         1             /* set bits here for debugging, 0 = off  */
 #define DB_CONS       1             /* bit to trace cons */
 #define DB_BINOP      2             /* bit to trace binop */
 #define DB_MAKEIF     4             /* bit to trace makeif */
@@ -193,51 +186,47 @@ TOKEN cons(TOKEN item, TOKEN list)           /* add item to front of list */
        };
     return item;
   }
-TOKEN nconc(TOKEN lista, TOKEN listb)
-{
-
+TOKEN unaryop(TOKEN op, TOKEN lhs) {
+    op->operands = lhs;          /* link operands to operator       */
+    lhs->link = NULL;
+    return op;
 }
+TOKEN findid(TOKEN tok) { /* the ID token */
+  SYMBOL sym, typ;
 
-TOKEN binop(TOKEN op, TOKEN lhs, TOKEN rhs)        /* reduce binary operator */
-  { op->operands = lhs;          /* link operands to operator       */
-    lhs->link = rhs;             /* link second operand to first    */
-    rhs->link = NULL;            /* terminate operand list          */
-    if (DEBUG & DB_BINOP)
-       { printf("binop\n");
-         dbugprinttok(op);
-         dbugprinttok(lhs);
-         dbugprinttok(rhs);
-       };
+  sym = searchst(tok->stringval);
+  tok->symentry = sym;
+  typ = sym->datatype;
+  tok->symtype = typ;
+  if ( typ->kind == BASICTYPE ||
+       typ->kind == POINTERSYM)
+      tok->datatype = typ->basicdt;
+  return tok;
+}
+void instvars(TOKEN idlist, TOKEN typetok)
+  {  SYMBOL sym, typesym; int align;
+     typesym = typetok->symtype;
+     align = alignsize(typesym);
+     while ( idlist != NULL )   /* for each id */
+       {  sym = insertsym(idlist->stringval);
+          sym->kind = VARSYM;
+          sym->offset =
+              wordaddress(blockoffs[blocknumber],
+                          align);
+          sym->size = typesym->size;
+          blockoffs[blocknumber] =
+                         sym->offset + sym->size;
+          sym->datatype = typesym;
+          sym->basicdt = typesym->basicdt;
+          idlist = idlist->link;
+        }
+  }
+TOKEN binop(TOKEN op, TOKEN lhs, TOKEN rhs) 
+  { op->operands = lhs;        
+    lhs->link = rhs;           
+    rhs->link = NULL; 
     return op;
   }
-TOKEN unaryop(TOKEN op, TOKEN lhs)
-{
-
-}
-TOKEN makeop(int opnum)
-{
-
-}
-TOKEN makefloat(TOKEN tok)
-{
-
-}
-TOKEN makefix(TOKEN tok)
-{
-
-}
-TOKEN fillintc(TOKEN tok, int num)
-{
-
-}
-TOKEN makeintc(int num)
-{
-
-}
-TOKEN copytok(TOKEN origtok)
-{
-
-}
 TOKEN makeif(TOKEN tok, TOKEN exp, TOKEN thenpart, TOKEN elsepart)
   {  tok->tokentype = OPERATOR;  /* Make it look like an operator   */
      tok->whichval = IFOP;
@@ -254,7 +243,6 @@ TOKEN makeif(TOKEN tok, TOKEN exp, TOKEN thenpart, TOKEN elsepart)
         };
      return tok;
    }
-
 TOKEN makeprogn(TOKEN tok, TOKEN statements)
   {  tok->tokentype = OPERATOR;
      tok->whichval = PROGNOP;
@@ -266,37 +254,44 @@ TOKEN makeprogn(TOKEN tok, TOKEN statements)
        };
      return tok;
    }
-TOKEN appendst(TOKEN statements, TOKEN more)
-{
-
-}
-TOKEN dogoto(TOKEN tok, TOKEN labeltok)
-{
-
-}
-TOKEN makelabel()
-{
-
-}
-TOKEN dolabel(TOKEN labeltok, TOKEN tok, TOKEN statement)
-{
-
-}
-void  instlabel (TOKEN num)
-{
-
+TOKEN makelabel() {
+  TOKEN newLabel = talloc();
+  newLabel->tokentype = OPERATOR;
+  newLabel->whichval = LABELOP;
+  newLabel->operands = makeintc(labelnumber);
+  labelnumber += 1;
+  return newLabel;
 }
 TOKEN makegoto(int label)
 {
-
-}
-void  settoktype(TOKEN tok, SYMBOL typ, SYMBOL ent)
-{
-
+  TOKEN gotoTok = talloc();
+  gotoTok->tokentype = OPERATOR;
+  gotoTok->whichval = GOTOOP;
+  gotoTok->operands = makeintc(labelnumber - 1);
+  return gotoTok;
 }
 TOKEN makefuncall(TOKEN tok, TOKEN fn, TOKEN args)
 {
+  printf("You called the makefuncall action \n");
+  printf("This is what args looks like: \n");
+  ppexpr(args);
+  tok->tokentype = OPERATOR;
+  tok->whichval = FUNCALLOP;
+    
+  //link fn to args
+  fn->link = args;
+  //link tok to fn
+  tok->operands = fn;
 
+  printf("You finished calling the makefuncall action \n");
+  return tok;
+}
+TOKEN makeintc(int num) {
+  TOKEN intMade = talloc();
+  intMade->tokentype = NUMBERTOK;
+  intMade->datatype = INTEGER;
+  intMade->intval = num;
+  return intMade;
 }
 TOKEN makeprogram(TOKEN name, TOKEN args, TOKEN statements)
 {
@@ -309,46 +304,178 @@ TOKEN makeprogram(TOKEN name, TOKEN args, TOKEN statements)
 
   tmpArgs = makeprogn(tmpArgs, args);
   name->link = tmpArgs;
-  nameToArgs->link = statements;
+  tmpArgs->link = statements;
   return program;
-}
-TOKEN makewhile(TOKEN tok, TOKEN expr, TOKEN tokb, TOKEN statement)
-{
-
-}
-TOKEN makerepeat(TOKEN tok, TOKEN statements, TOKEN tokb, TOKEN expr)
-{
-
 }
 TOKEN makefor(int sign, TOKEN tok, TOKEN asg, TOKEN tokb, TOKEN endexpr,
               TOKEN tokc, TOKEN statement)
 {
+  printf("You called the makefor function \n");
+    //what am i suppose to in this function
+    //create progn operator token
+    
+    printf("This is what statement looks like: \n");
+    ppexpr(statement);
+    //Set up progn
+    tok->tokentype = OPERATOR;
+    tok->whichval = PROGNOP;
+    printf("setted up tok \n");
+    //progn link to asg
+    tok->operands = asg;
+    printf("tok operanded \n");
+    
+    //setup tokb to be label
+    tokb->tokentype = OPERATOR;
+    tokb->whichval = LABELOP;
+    printf("setted up tokb \n");
+    
+    //link asg to label
+    asg->link=tokb;
+    
+    
+    //create integer token
+    TOKEN tokz = talloc();
+    tokz->tokentype = NUMBERTOK;
+    tokz->datatype = INTEGER;
+    int lbl = labelnumber++;
+    tokz->intval = lbl; // 0 in the diagram
+    printf("setted up tokz \n");
+    
+    //link tokb to tokz (integer token)
+    tokb->operands = tokz;
+    
+    //create ifop token
+    tokc->tokentype = OPERATOR;
+    tokc->whichval = IFOP;
+    printf("setted up tokc \n");
+    
+    //link tokb to tokc (label to if)
+    tokb->link = tokc;
+    
+    //create <= tok
+    TOKEN tokd = talloc();
+    tokd->tokentype = OPERATOR;
+    tokd->whichval = LEOP;
+    printf("setted up tokd \n");
+    
+    //link ifop (tokc) to <= tok 
+    tokc->operands = tokd;
+    
+    //tokd->link =
+    //tokd->operands =
+    
+    //create 'i' token - which is copying token i from asg tok
+    TOKEN tokf = talloc();
+    tokf->tokentype = asg->operands->tokentype;
+    printf("the value for asg operands token type is: %s \n",asg->operands->stringval);
+    strcpy (tokf->stringval,asg->operands->stringval);
+    //tokf->stringval = asg->operands->stringval;
+    //connect tokf to endexpr
+    tokf->link = endexpr;
+    
+    //connect <= operator to i
+    tokd->operands = tokf;
+    
+    //Set up progn
+    TOKEN toke = talloc();
+    toke->tokentype = OPERATOR;
+    toke->whichval = PROGNOP;
+    printf("setted up toke \n");
+    
+    //link tokd with progn (less than equal to, to , progn)
+    tokd->link = toke;
+    
+    //progn link to statement
+    toke->operands = statement;
+    printf("tok operanded \n");
+    
+    //statement link to :=
+    TOKEN tokg = talloc();
+    tokg->tokentype = OPERATOR;
+    tokg->whichval = ASSIGNOP;
+    statement->link = tokg;
+    printf("statement linked to := \n");
+    
+    //:= to i
+    //create 'i' token - which is copying token i from asg tok
+    TOKEN tokh = talloc();
+    tokh->tokentype = asg->operands->tokentype;
+    
+    strcpy (tokh->stringval,asg->operands->stringval);
+    //link tokg(:=) to identiifer token i
+    tokg->operands = tokh;
+    printf("operanded := with i \n");
+    
+    //i to +
+    TOKEN toki = talloc();
+    toki->tokentype = OPERATOR;
+    toki->whichval = PLUSOP;
+    tokh->link = toki;
+    printf("linked i with + \n");
+    
+    //+ to i
+    TOKEN tokj = talloc();
+    tokj->tokentype = asg->operands->tokentype;
+    strcpy (tokj->stringval,asg->operands->stringval);
+    toki->operands = tokj;
+    printf("operaended + with 1 \n");
+    
+    //i to 1
+    TOKEN tokl = talloc();
+    tokl->tokentype = NUMBERTOK;
+    tokl->datatype = INTEGER;
+    tokl->intval = 1;
+    tokj->link = tokl;
+    printf("linked i and 1 \n");
+    
+    //tokg link to goto
+    TOKEN tokq = talloc();
+    tokq->tokentype = OPERATOR;
+    tokq->whichval = GOTOOP;
+    tokg->link = tokq;
+    printf("linked := with goto \n");
+    
+    //goto operand to 0 (lbl)
+    TOKEN tokm = talloc();
+    tokm->tokentype = NUMBERTOK;
+    tokm->datatype = INTEGER;
+    tokm->intval = lbl;
+    printf("operanded goto and labelnumber \n");
+    
+    tokq->operands = tokm;
+    printf("the following shows what tok looks like in makefor function using pretty print function \n");
+    
+    ppexpr(tok); 
+    printf("\n ppexpr just ran \n");
+    printf("You finished calling the makefor function \n");
+    return tok;
 
 }
-TOKEN findid(TOKEN tok)
+TOKEN findtype(TOKEN tok)
 {
-
+    SYMBOL sym, typ;
+    sym = searchst(tok->stringval);
+        
+    if(sym->kind == BASICTYPE ) //then the token is itself a basic datatype (Integer, Real, String, Bool)
+    {
+      tok->symtype = sym; 
+      tok->datatype = sym->basicdt; 
+          
+    }
+    else if(sym->kind == TYPESYM)
+    {
+      tok->symtype = sym->datatype;
+        
+    }
+    else //error
+    {
+        printf("Your findtype recieved bad type \n");
+    }
+     return tok;
 }
-void  instconst(TOKEN idtok, TOKEN consttok)
-{
-
-}
-TOKEN makesubrange(TOKEN tok, int low, int high)
-{
-
-}
-TOKEN instenum(TOKEN idlist)
-{
-
-}
-TOKEN instdotdot(TOKEN lowtok, TOKEN dottok, TOKEN hightok)
-{
-}
-TOKEN findtype(TOKEN tok);
-
 int wordaddress(int n, int wordsize)
   { return ((n + wordsize - 1) / wordsize) * wordsize; }
- 
+
 yyerror(s)
   char * s;
   { 

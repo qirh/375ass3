@@ -1,0 +1,93 @@
+2 id_list
+cons
+ token 140287797109216  ID        output  dtype  0  link 0
+ token 0  NULL
+2 id_list
+cons
+ token 140287797109600  ID           lim  dtype  0  link 0
+ token 0  NULL
+1 id_list
+cons
+ token 140287797109472  ID             i  dtype  0  link 140287797109600
+ token 140287797109600  ID           lim  dtype  0  link 0
+1 simple_type
+1 type
+1 vargroup
+2 varspecs
+3 factor
+4 factor
+6 term
+2 sexpr
+5 expr
+1 assignment
+4 statement
+Symbol table level 0
+ 140287799204032        real  BASIC  basicdt   1          siz     8
+ 140287797103888     integer  BASIC  basicdt   0          siz     4
+ 140287797103968        char  BASIC  basicdt   2          siz     1
+ 140287797104048     boolean  BASIC  basicdt   3          siz     4
+ 140287797104144         exp  knd 5 0  typ 140287797104224  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 140287797104384       trexp  knd 5 0  typ 140287797104464  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 140287797104624         sin  knd 5 0  typ 140287797104704  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 140287797104864         cos  knd 5 0  typ 140287797104944  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 140287797105104       trsin  knd 5 0  typ 140287797105184  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 140287797105344        sqrt  knd 5 0  typ 140287797105424  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 140287797105584       round  knd 5 0  typ 140287797105664  lvl  0  siz     0  off     0
+(FUNCTION real
+          real)
+ 140287797105824      iround  knd 5 0  typ 140287797105904  lvl  0  siz     0  off     0
+(FUNCTION integer
+          real)
+ 140287797106064         ord  knd 5 0  typ 140287797106144  lvl  0  siz     0  off     0
+(FUNCTION integer
+          integer)
+ 140287797106304         new  knd 5 0  typ 140287797106384  lvl  0  siz     0  off     0
+(FUNCTION integer
+          integer)
+ 140287797106544       trnew  knd 5 0  typ 140287797106624  lvl  0  siz     0  off     0
+(FUNCTION integer
+          integer)
+ 140287797106784       write  knd 5 0  typ 140287797106864  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          char)
+ 140287797107024     writeln  knd 5 0  typ 140287797107104  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          char)
+ 140287797107264      writef  knd 5 0  typ 140287797107344  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          real)
+ 140287797107504    writelnf  knd 5 0  typ 140287797107584  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          real)
+ 140287797107744      writei  knd 5 0  typ 140287797107824  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          integer)
+ 140287797107984    writelni  knd 5 0  typ 140287797108064  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          integer)
+ 140287797108224        read  knd 5 0  typ 140287797108304  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          NULL)
+ 140287797108464      readln  knd 5 0  typ 140287797108544  lvl  0  siz     0  off     0
+(FUNCTION NULL
+          NULL)
+ 140287797108704         eof  knd 5 0  typ 140287797108784  lvl  0  siz     0  off     0
+(FUNCTION boolean
+          NULL)
+Symbol table level 1
+ 140287797109792           i  VAR    0 typ integer  lvl  1  siz     4  off     0
+ 140287797109872         lim  VAR    0 typ integer  lvl  1  siz     4  off     4
+yyparse result =        1
+ppexpr called with bad pointer 0
