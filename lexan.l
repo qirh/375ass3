@@ -62,7 +62,7 @@ ws       {delim}+
 letter   [A-Za-z]
 digit    [0-9]
 id       {letter}({letter}|{digit})*
-number   {digit}+($|{ws}|;)
+number   {digit}+
 fnumber  {digit}+(\.{digit}+)?((E|e)[+\-]?{digit}+)?
 
 string   ('([^']|(''))*')
@@ -111,6 +111,7 @@ mod       {return(maketoken(OPERATOR, MOD));}
 in        {return(maketoken(OPERATOR, IN));}
 
 array       {return(maketoken(RESERVED, ARRAY));}
+to       {return(maketoken(RESERVED, TO));}
 case        {return (maketoken(RESERVED, CASE));}
 const       {return (maketoken(RESERVED, CONST));}
 do          {return (maketoken(RESERVED, DO));}
@@ -128,7 +129,7 @@ program     {return (maketoken(RESERVED, PROGRAM));}
 record      {return (maketoken(RESERVED, RECORD));} 
 repeat      {return (maketoken(RESERVED, REPEAT));} 
 set         {return (maketoken(RESERVED, SET));}
-to          {return (maketoken(RESERVED, TO));}
+wto          {return (maketoken(RESERVED, TO));}
 type        {return (maketoken(RESERVED, TYPE));}
 until       {return (maketoken(RESERVED, UNTIL));}
 var         {return (maketoken(RESERVED, VAR));}
@@ -205,25 +206,32 @@ int install_num()
 }
 int install_str()
 { 
-  int len, n = 0;
-  yylval = (TOKEN) talloc();
+  int i, b, c, n, d;
+  yylval = (TOKEN) talloc();  
   yylval->tokentype = STRINGTOK;
+  n = yyleng;       
+  if ( n > 15 ) 
+    n = 15;
+  d = 0;
 
-  len = yyleng;
-  if( len > 17)
-    len = 17;
-
-  for (int i = 0; i < len-1; i++)
-  {
-    if (yytext[i+1] == '\'' && (i+1) != 1)
-    {
-      n++;
-      i++;
+  for (i = 0, b = 1; i < n ; i++, b++){ 
+    c = yytext[b];
+     
+    if (c == '\'' && yytext[i+1] == '\'') {
+      yylval->stringval[i] = c;
+      b++;
+      d++;
     }
-    int x = yytext[i+1];
-    yylval->stringval[i-n] = x;
-  }
-  yylval->stringval[len-1-n] = '\0';    //terminate
+    else if (c == '\'') 
+    {
+    }
+    else yylval->stringval[i] = c;
+  };
+
+  if (n != 15)
+    d++;   
+
+  yylval->stringval[n-d] = '\0';
   return(STRING);
 }
 void install_coma()   
