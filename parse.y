@@ -80,12 +80,12 @@ TOKEN parseresult;
 
   program   : PROGRAM IDENTIFIER LPAREN id_list RPAREN SEMICOLON vblock DOT /* { printf("1 program\n"); */ { parseresult = makeprogram($2, $4, $7); }
             ;
-  variable  : IDENTIFIER                               /* { printf("1 variable\n"); */ { }
+  variable  : IDENTIFIER                               /* { printf("1 variable\n"); */ 
             ;
   id_list   : IDENTIFIER COMMA id_list                 /* { printf("1 id_list\n"); */ { $$ = cons($1, $3); }
             | IDENTIFIER                               /* { printf("2 id_list\n"); */ { $$ = cons($1, NULL); }
             ;  
-  type      : simple_type                              /* { printf("1 type\n"); */ { }
+  type      : simple_type                              /* { printf("1 type\n"); */ 
             | ARRAY LBRACKET simple_type_list RBRACKET OF type /* { printf("2 type\n"); */ { $$ = NULL; }
             | POINT IDENTIFIER                         /* { printf("3 type\n"); */ { $$ = NULL; }
             ;  
@@ -94,14 +94,14 @@ TOKEN parseresult;
             | NUMBER DOTDOT NUMBER /*NUMBER|constant?*//* { printf("3 simple_type\n"); */ { $$ = NULL; }
             ;
   simple_type_list : simple_type COMMA simple_type_list/* { printf("1 simple_type_list\n"); */ { $$ = cons($3, $1); }
-                   | simple_type                       /* { printf("2 simple_type_list\n"); */ { }
+                   | simple_type                       /* { printf("2 simple_type_list\n"); */ 
                    ;
   block     : BEGINBEGIN statement endpart             /* { printf("1 block\n"); */ { $$ = makeprogn($1, cons($2, $3));  }
             ;
   vblock    : VAR vdef_list block                      /* { printf("1 vblock\n"); */ { $$ = $3; }
-            | block                                    /* { printf("2 vblock\n"); */ { }
+            | block                                    /* { printf("2 vblock\n"); */ 
             ; 
-  vdef_list : vdef SEMICOLON                           /* { printf("1 vdef_list\n"); */ { }
+  vdef_list : vdef SEMICOLON                           /* { printf("1 vdef_list\n"); */ 
             ;
   vdef      : id_list COLON type                       /* { printf("1 vdef\n"); */ { instvars($1, $3); }
             ;
@@ -113,7 +113,7 @@ TOKEN parseresult;
             | BEGINBEGIN statement endpart             /* { printf("4 statement\n"); */ { $$ = makeprogn($1, cons($2, $3)); }
             | IF expr THEN statement endif             /* { printf("5 statement\n"); */ { $$ = makeif($1, $2, $4, $5); }
             | FOR assignment TO expr DO statement      /* { printf("6 statement\n"); */ { $$ = makefor(1, $1, $2, $3, $4, $5, $6); }
-            | funcall                                  /* { printf("7 statement\n"); */ { }
+            | funcall                                  /* { printf("7 statement\n"); */ 
             ;
   endpart   : SEMICOLON statement endpart              /* { printf("1 endpart\n"); */ { $$ = cons($2, $3); }
             | END                                      /* { printf("2 endpart\n"); */ { $$ = NULL; }
@@ -125,40 +125,40 @@ TOKEN parseresult;
             ;
   expr      : expr alg_op term                         /* { printf("1 expr\n"); */ { $$ = binop($2, $1, $3); }
             | expr alg_op sexpr                        /* { printf("2 expr\n"); */ { $$ = binop($2, $1, $3); }
-            | sexpr                                    /* { printf("3 expr\n"); */ { }
-            | term                                     /* { printf("4 expr\n"); */ { }
+            | sexpr                                    /* { printf("3 expr\n"); */ 
+            | term                                     /* { printf("4 expr\n"); */ 
             ;
   sexpr     : sexpr alg_op term                        /* { printf("1 sexpr\n"); */ { $$ = unaryop($1, $2); }
-            | term                                     /* { printf("2 sexpr\n"); */ { }
-            | STRING                                   /* { printf("3 sexpr\n"); */ { }
+            | term                                     /* { printf("2 sexpr\n"); */ 
+            | STRING                                   /* { printf("3 sexpr\n"); */ 
             ;
   expr_list : expr COMMA expr_list                     /* { printf("1 expr_list\n"); */ { $$ = cons($1, $3); }
-            | expr                                     /* { printf("2 expr_list\n"); */ { }
+            | expr                                     /* { printf("2 expr_list\n"); */ 
             ;
   term      : term TIMES factor                        /* { printf("1 term\n"); */ { $$ = binop($2, $1, $3); }
-            | factor                                   /* { printf("2 term\n"); */ { }
+            | factor                                   /* { printf("2 term\n"); */ 
             ;
   factor    : LPAREN expr RPAREN                       /* { printf("1 factor\n"); */ { $$ = $2; }
-            | variable                                 /* { printf("2 factor\n"); */ { }
-            | NUMBER                                   /* { printf("3 factor\n"); */ { }
+            | variable                                 /* { printf("2 factor\n"); */ 
+            | NUMBER                                   /* { printf("3 factor\n"); */ 
             
             ;
   args      : expr COMMA args                          /* { printf("1 args\n"); */ { $$ = cons($1, $3); }
             | expr                                     /* { printf("2 args\n"); */ { $$ = cons($1, NULL);}
             ;
-  compare_op: EQ                                       /* { printf("1 compare_op\n"); */ { }
-            | LT                                       /* { printf("2 compare_op\n"); */ { }
-            | GT                                       /* { printf("3 compare_op\n"); */ { }
-            | NE                                       /* { printf("4 compare_op\n"); */ { }
-            | LE                                       /* { printf("5 compare_op\n"); */ { }
-            | GE                                       /* { printf("6 compare_op\n"); */ { }
-            | IN                                       /* { printf("7 compare_op\n"); */ { }
+  compare_op: EQ                                       /* { printf("1 compare_op\n"); */ 
+            | LT                                       /* { printf("2 compare_op\n"); */ 
+            | GT                                       /* { printf("3 compare_op\n"); */ 
+            | NE                                       /* { printf("4 compare_op\n"); */ 
+            | LE                                       /* { printf("5 compare_op\n"); */ 
+            | GE                                       /* { printf("6 compare_op\n"); */ 
+            | IN                                       /* { printf("7 compare_op\n"); */ 
             ;
-  alg_op    : PLUS                                     /* { printf("1 plus_op\n"); */ { }
-            | MINUS                                    /* { printf("2 plus_op\n"); */ { }
-            | OR                                       /* { printf("3 plus_op\n"); */ { }
-            | TIMES                                    /* { printf("4 plus_op\n"); */ { }
-            | DIVIDE                                   /* { printf("5 plus_op\n"); */ { }
+  alg_op    : PLUS                                     /* { printf("1 plus_op\n"); */ 
+            | MINUS                                    /* { printf("2 plus_op\n"); */ 
+            | OR                                       /* { printf("3 plus_op\n"); */ 
+            | TIMES                                    /* { printf("4 plus_op\n"); */ 
+            | DIVIDE                                   /* { printf("5 plus_op\n"); */ 
             ;
 %%
 
@@ -326,8 +326,7 @@ TOKEN makeprogram(TOKEN name, TOKEN args, TOKEN statements) {
 
   return program;
 }
-TOKEN makefor(int sign, TOKEN tok, TOKEN asg, TOKEN tokb, TOKEN endexpr,
-  TOKEN tokc, TOKEN statement) {
+TOKEN makefor(int sign, TOKEN tok, TOKEN asg, TOKEN tokb, TOKEN endexpr, TOKEN tokc, TOKEN statement) {
 
   //printf("makefor()\n\t");
 
@@ -342,10 +341,10 @@ TOKEN makefor(int sign, TOKEN tok, TOKEN asg, TOKEN tokb, TOKEN endexpr,
   TOKEN tok1 = talloc();
   tok1->tokentype = NUMBERTOK;
   tok1->datatype = INTEGER;
-  int lbl = labelnumber++;
-  tok1->intval = lbl; 
-  tokb->operands = tok1;
+  labelnumber+=1;
+  tok1->intval = labelnumber; 
   
+  tokb->operands = tok1;
   tokc->tokentype = OPERATOR;
   tokc->whichval = IFOP;
   tokb->link = tokc;
@@ -359,14 +358,12 @@ TOKEN makefor(int sign, TOKEN tok, TOKEN asg, TOKEN tokb, TOKEN endexpr,
   tok3->tokentype = asg->operands->tokentype;
   strcpy (tok3->stringval,asg->operands->stringval);
   tok3->link = endexpr;
-  
   tok2->operands = tok3;
   
   TOKEN tok4 = talloc();
   tok4->tokentype = OPERATOR;
   tok4->whichval = PROGNOP;
   tok2->link = tok4;
-  
   tok4->operands = statement;
 
   TOKEN tok5 = talloc();
@@ -376,7 +373,6 @@ TOKEN makefor(int sign, TOKEN tok, TOKEN asg, TOKEN tokb, TOKEN endexpr,
 
   TOKEN tok6 = talloc();
   tok6->tokentype = asg->operands->tokentype;
-  
   strcpy (tok6->stringval,asg->operands->stringval);
   tok5->operands = tok6;
   
@@ -404,8 +400,7 @@ TOKEN makefor(int sign, TOKEN tok, TOKEN asg, TOKEN tokb, TOKEN endexpr,
   TOKEN tokB = talloc();
   tokB->tokentype = NUMBERTOK;
   tokB->datatype = INTEGER;
-  tokB->intval = lbl;
-  
+  tokB->intval = labelnumber;
   tokA->operands = tokB;
   
   if (DEBUG){ 
