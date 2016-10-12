@@ -78,6 +78,7 @@ then      {return(maketoken(RESERVED, THEN));}
 else      {return(maketoken(RESERVED, ELSE));}
 begin     {return(maketoken(RESERVED, BEGINBEGIN));}
 end       {return(maketoken(RESERVED, END));}
+const     {return (maketoken(RESERVED, CONST));}
 
 "<"       {return(maketoken(OPERATOR, LT));}
 "<="      {return(maketoken(OPERATOR, LE));}
@@ -111,9 +112,9 @@ mod       {return(maketoken(OPERATOR, MOD));}
 in        {return(maketoken(OPERATOR, IN));}
 
 array       {return(maketoken(RESERVED, ARRAY));}
-to       {return(maketoken(RESERVED, TO));}
+to          {return(maketoken(RESERVED, TO));}
 case        {return (maketoken(RESERVED, CASE));}
-const       {return (maketoken(RESERVED, CONST));}
+
 do          {return (maketoken(RESERVED, DO));}
 downto      {return (maketoken(RESERVED, DOWNTO));}
 file        {return (maketoken(RESERVED, FILEFILE));}
@@ -129,7 +130,6 @@ program     {return (maketoken(RESERVED, PROGRAM));}
 record      {return (maketoken(RESERVED, RECORD));} 
 repeat      {return (maketoken(RESERVED, REPEAT));} 
 set         {return (maketoken(RESERVED, SET));}
-wto          {return (maketoken(RESERVED, TO));}
 type        {return (maketoken(RESERVED, TYPE));}
 until       {return (maketoken(RESERVED, UNTIL));}
 var         {return (maketoken(RESERVED, VAR));}
@@ -222,10 +222,9 @@ int install_str()
       b++;
       d++;
     }
-    else if (c == '\'') 
-    {
-    }
-    else yylval->stringval[i] = c;
+    else if (c == '\'') {}
+    else 
+      yylval->stringval[i] = c;
   };
 
   if (n != 15)

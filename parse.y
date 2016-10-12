@@ -78,86 +78,87 @@ TOKEN parseresult;
 
 %%
 
-  program   : PROGRAM IDENTIFIER LPAREN id_list RPAREN SEMICOLON vblock DOT { printf("1 program\n"); parseresult = makeprogram($2, $4, $7); }
+  program   : PROGRAM IDENTIFIER LPAREN id_list RPAREN SEMICOLON vblock DOT /* { printf("1 program\n"); */ { parseresult = makeprogram($2, $4, $7); }
             ;
-  variable  : IDENTIFIER                               { printf("1 variable\n"); }
+  variable  : IDENTIFIER                               /* { printf("1 variable\n"); */ { }
             ;
-  id_list   : IDENTIFIER COMMA id_list                 { printf("1 id_list\n"); $$ = cons($1, $3); }
-            | IDENTIFIER                               { printf("2 id_list\n"); $$ = cons($1, NULL); }
+  id_list   : IDENTIFIER COMMA id_list                 /* { printf("1 id_list\n"); */ { $$ = cons($1, $3); }
+            | IDENTIFIER                               /* { printf("2 id_list\n"); */ { $$ = cons($1, NULL); }
             ;  
-  type      : simple_type                              { printf("1 type\n"); }
-            | ARRAY LBRACKET simple_type_list RBRACKET OF type { printf("2 type\n"); $$ = NULL; }
-            | POINT IDENTIFIER                         { printf("3 type\n"); $$ = NULL; }
+  type      : simple_type                              /* { printf("1 type\n"); */ { }
+            | ARRAY LBRACKET simple_type_list RBRACKET OF type /* { printf("2 type\n"); */ { $$ = NULL; }
+            | POINT IDENTIFIER                         /* { printf("3 type\n"); */ { $$ = NULL; }
             ;  
-  simple_type: IDENTIFIER                              { printf("1 simple_type\n"); $$ = findtype($1); }
-            | LPAREN id_list RPAREN                    { printf("2 simple_type\n"); $$ = NULL; }
-            | NUMBER DOTDOT NUMBER /*NUMBER|constant?*/{ printf("3 simple_type\n"); $$ = NULL; }
+  simple_type: IDENTIFIER                              /* { printf("1 simple_type\n"); */ { $$ = findtype($1); }
+            | LPAREN id_list RPAREN                    /* { printf("2 simple_type\n"); */ { $$ = NULL; }
+            | NUMBER DOTDOT NUMBER /*NUMBER|constant?*//* { printf("3 simple_type\n"); */ { $$ = NULL; }
             ;
-  simple_type_list : simple_type COMMA simple_type_list{ printf("1 simple_type_list\n"); $$ = cons($3, $1); }
-                   | simple_type                       { printf("2 simple_type_list\n"); }
+  simple_type_list : simple_type COMMA simple_type_list/* { printf("1 simple_type_list\n"); */ { $$ = cons($3, $1); }
+                   | simple_type                       /* { printf("2 simple_type_list\n"); */ { }
                    ;
-  block     : BEGINBEGIN statement endpart             { printf("1 block\n"); $$ = makeprogn($1, cons($2, $3)); printf("1 block2\n"); }
+  block     : BEGINBEGIN statement endpart             /* { printf("1 block\n"); */ { $$ = makeprogn($1, cons($2, $3));  }
             ;
-  vblock    : VAR vdef_list block                      { printf("1 vblock\n"); $$ = $3; }
-            | block                                    { printf("2 vblock\n"); }
+  vblock    : VAR vdef_list block                      /* { printf("1 vblock\n"); */ { $$ = $3; }
+            | block                                    /* { printf("2 vblock\n"); */ { }
             ; 
-  vdef_list : vdef SEMICOLON                           { printf("1 vdef_list\n"); }
+  vdef_list : vdef SEMICOLON                           /* { printf("1 vdef_list\n"); */ { }
             ;
-  vdef      : id_list COLON type                       { printf("1 vdef\n"); instvars($1, $3); }
+  vdef      : id_list COLON type                       /* { printf("1 vdef\n"); */ { instvars($1, $3); }
             ;
-  funcall   : IDENTIFIER LPAREN expr_list RPAREN       { printf("1 funcall\n"); cons($1, $3); }
+  funcall   : IDENTIFIER LPAREN expr_list RPAREN       /* { printf("1 funcall\n"); */ { cons($1, $3); }
             ;
-  statement : NUMBER COLON statement                   { printf("1 statement\n"); $$ = NULL; }
-            | assignment                               { printf("2 statement\n"); $$ = $1; printf("2 statement2\n"); }
-            | IDENTIFIER LPAREN args RPAREN            { printf("3 statement\n"); $$ = makefuncall($2, findid($1), $3); }
-            | BEGINBEGIN statement endpart             { printf("4 statement\n"); $$ = makeprogn($1, cons($2, $3)); }
-            | IF expr THEN statement endif             { printf("5 statement\n"); $$ = makeif($1, $2, $4, $5); }
-            | FOR assignment TO expr DO statement      { printf("6 statement\n"); $$ = makefor(1, $1, $2, $3, $4, $5, $6); }
-            | funcall                                  { printf("7 statement\n"); }
+  statement : NUMBER COLON statement                   /* { printf("1 statement\n"); */ { $$ = NULL; }
+            | assignment                               /* { printf("2 statement\n"); */ { $$ = $1; }
+            | IDENTIFIER LPAREN args RPAREN            /* { printf("3 statement\n"); */ { $$ = makefuncall($2, findid($1), $3); }
+            | BEGINBEGIN statement endpart             /* { printf("4 statement\n"); */ { $$ = makeprogn($1, cons($2, $3)); }
+            | IF expr THEN statement endif             /* { printf("5 statement\n"); */ { $$ = makeif($1, $2, $4, $5); }
+            | FOR assignment TO expr DO statement      /* { printf("6 statement\n"); */ { $$ = makefor(1, $1, $2, $3, $4, $5, $6); }
+            | funcall                                  /* { printf("7 statement\n"); */ { }
             ;
-  endpart   : SEMICOLON statement endpart              { printf("1 endpart\n"); $$ = cons($2, $3); }
-            | END                                      { printf("2 endpart\n"); $$ = NULL; }
+  endpart   : SEMICOLON statement endpart              /* { printf("1 endpart\n"); */ { $$ = cons($2, $3); }
+            | END                                      /* { printf("2 endpart\n"); */ { $$ = NULL; }
             ;
-  endif     : ELSE statement                           { printf("1 endif\n"); $$ = $2; }
-            | /* empty */                              { printf("2 endif\n"); $$ = NULL; }
+  endif     : ELSE statement                           /* { printf("1 endif\n"); */ { $$ = $2; }
+            | /* empty */                              /* { printf("2 endif\n"); */ { $$ = NULL; }
             ;
-  assignment: variable ASSIGN expr                     { printf("1 assignment\n"); $$ = binop($2, $1, $3); }
+  assignment: variable ASSIGN expr                     /* { printf("1 assignment\n"); */ { $$ = binop($2, $1, $3); }
             ;
-  expr      : expr alg_op term                         { printf("1 expr\n"); $$ = binop($2, $1, $3); }
-            | expr alg_op sexpr                        { printf("2 expr\n"); $$ = binop($2, $1, $3); }
-            | sexpr                                    { printf("3 expr\n"); }
-            | term                                     { printf("4 expr\n"); }
+  expr      : expr alg_op term                         /* { printf("1 expr\n"); */ { $$ = binop($2, $1, $3); }
+            | expr alg_op sexpr                        /* { printf("2 expr\n"); */ { $$ = binop($2, $1, $3); }
+            | sexpr                                    /* { printf("3 expr\n"); */ { }
+            | term                                     /* { printf("4 expr\n"); */ { }
             ;
-  sexpr     : sexpr alg_op term                        { printf("1 sexpr\n"); $$ = unaryop($1, $2); }
-            | term                                     { printf("2 sexpr\n"); }
+  sexpr     : sexpr alg_op term                        /* { printf("1 sexpr\n"); */ { $$ = unaryop($1, $2); }
+            | term                                     /* { printf("2 sexpr\n"); */ { }
+            | STRING                                   /* { printf("3 sexpr\n"); */ { }
             ;
-  expr_list : expr COMMA expr_list                     { printf("1 expr_list\n"); $$ = cons($1, $3); }
-            | expr                                     { printf("2 expr_list\n"); }
+  expr_list : expr COMMA expr_list                     /* { printf("1 expr_list\n"); */ { $$ = cons($1, $3); }
+            | expr                                     /* { printf("2 expr_list\n"); */ { }
             ;
-  term      : term TIMES factor                        { printf("1 term\n"); $$ = binop($2, $1, $3); }
-            | factor                                   { printf("2 term\n"); }
+  term      : term TIMES factor                        /* { printf("1 term\n"); */ { $$ = binop($2, $1, $3); }
+            | factor                                   /* { printf("2 term\n"); */ { }
             ;
-  factor    : LPAREN expr RPAREN                       { printf("1 factor\n"); $$ = $2; }
-            | variable                                 { printf("2 factor\n"); }
-            | NUMBER                                   { printf("3 factor\n"); }
-            | STRING
+  factor    : LPAREN expr RPAREN                       /* { printf("1 factor\n"); */ { $$ = $2; }
+            | variable                                 /* { printf("2 factor\n"); */ { }
+            | NUMBER                                   /* { printf("3 factor\n"); */ { }
+            
             ;
-  args      : expr COMMA args                          { printf("1 args\n"); $$ = cons($1, $3); }
-            | expr                                     { printf("2 args\n"); $$ = cons($1, NULL);}
+  args      : expr COMMA args                          /* { printf("1 args\n"); */ { $$ = cons($1, $3); }
+            | expr                                     /* { printf("2 args\n"); */ { $$ = cons($1, NULL);}
             ;
-  compare_op: EQ                                       { printf("1 compare_op\n"); }
-            | LT                                       { printf("2 compare_op\n"); }
-            | GT                                       { printf("3 compare_op\n"); }
-            | NE                                       { printf("4 compare_op\n"); }
-            | LE                                       { printf("5 compare_op\n"); }
-            | GE                                       { printf("6 compare_op\n"); }
-            | IN                                       { printf("7 compare_op\n"); }
+  compare_op: EQ                                       /* { printf("1 compare_op\n"); */ { }
+            | LT                                       /* { printf("2 compare_op\n"); */ { }
+            | GT                                       /* { printf("3 compare_op\n"); */ { }
+            | NE                                       /* { printf("4 compare_op\n"); */ { }
+            | LE                                       /* { printf("5 compare_op\n"); */ { }
+            | GE                                       /* { printf("6 compare_op\n"); */ { }
+            | IN                                       /* { printf("7 compare_op\n"); */ { }
             ;
-  alg_op    : PLUS                                     { printf("1 plus_op\n"); }
-            | MINUS                                    { printf("2 plus_op\n"); }
-            | OR                                       { printf("3 plus_op\n"); }
-            | TIMES                                    { printf("4 plus_op\n"); }
-            | DIVIDE                                   { printf("5 plus_op\n"); }
+  alg_op    : PLUS                                     /* { printf("1 plus_op\n"); */ { }
+            | MINUS                                    /* { printf("2 plus_op\n"); */ { }
+            | OR                                       /* { printf("3 plus_op\n"); */ { }
+            | TIMES                                    /* { printf("4 plus_op\n"); */ { }
+            | DIVIDE                                   /* { printf("5 plus_op\n"); */ { }
             ;
 %%
 
@@ -168,22 +169,7 @@ TOKEN parseresult;
    are working.
   */
 
-#define DEBUG        31             /* set bits here for debugging, 0 = off  */
-#define DB_CONS       1             /* bit to trace cons */
-#define DB_UNARYOP    1             /* bit to trace unaryop */
-#define DB_BINOP      2             /* bit to trace binop */
-#define DB_FINDID     2             /* bit to trace findid */
-#define DB_INSTAVARS  2             /* bit to trace instavars */
-#define DB_MAKEIF     4             /* bit to trace makeif */
-#define DB_MAKEPROGN  4             /* bit to trace makeprogn */
-#define DB_LABEL      4             /* bit to trace label */
-#define DB_GOTO       4             /* bit to trace goto */
-#define DB_FUNCALL    8             /* bit to trace funcall */
-#define DB_INTC       8             /* bit to trace intc */
-#define DB_MAKEPROGRAM8             /* bit to trace makeprogram */
-#define DB_MAKEFOR    8             /* bit to trace makefor */
-#define DB_FINDTYPE   8             /* bit to trace findtype */
-#define DB_PARSERES  16             /* bit to trace parseresult */
+#define DEBUG        0
 
  int labelnumber = 0;  /* sequential counter for internal label numbers */
 
@@ -191,39 +177,39 @@ TOKEN parseresult;
        printouts in your routines similar to those that are shown here.     */
 
 TOKEN cons(TOKEN item, TOKEN list) {
-  printf("cons()\n");
+  //printf("cons()\n");
   item->link = list;
-  if (DEBUG & DB_CONS) {
+  if (DEBUG) {
     printf("cons\n");
     dbugprinttok(item);
     dbugprinttok(list);
   };
-  printf("cons() ends\n");
+  //printf("cons() ends\n");
   return item;
 }
 TOKEN unaryop(TOKEN op, TOKEN lhs) {
-  printf("unaryop()\n");
+  //printf("unaryop()\n");
   op->operands = lhs;
   lhs->link = NULL;
-  printf("unaryop() ends\n");
+  //printf("unaryop() ends\n");
   return op;
 }
 TOKEN binop(TOKEN op, TOKEN lhs, TOKEN rhs) { 
-  printf("binop()\n");
+  //printf("binop()\n");
   op->operands = lhs;          /* link operands to operator       */
   lhs->link = rhs;             /* link second operand to first    */
   rhs->link = NULL;            /* terminate operand list          */
-  if (DEBUG & DB_BINOP) { 
+  if (DEBUG) { 
     printf("binop\n");
     dbugprinttok(op);
     dbugprinttok(lhs);
     dbugprinttok(rhs);
   };
-  printf("binop() ends\n");
+  //printf("binop() ends\n");
   return op;
 }
 TOKEN findid(TOKEN tok) {
-  printf("findid()\n");
+  //printf("findid()\n");
   SYMBOL sym, typ;
   sym = searchst(tok->stringval);
   tok->symentry = sym;
@@ -231,11 +217,11 @@ TOKEN findid(TOKEN tok) {
   tok->symtype = typ;
   if ( typ->kind == BASICTYPE || typ->kind == POINTERSYM)
       tok->datatype = typ->basicdt;
-  printf("findid() ends\n");
+  //printf("findid() ends\n");
   return tok;
 }
 void instvars(TOKEN id_list, TOKEN typetok) {
-  printf("instvars()\n");
+  //printf("instvars()\n");
   SYMBOL sym, typesym;
   int align;
   typesym = typetok->symtype;
@@ -250,60 +236,60 @@ void instvars(TOKEN id_list, TOKEN typetok) {
     sym->basicdt = typesym->basicdt;
     id_list = id_list->link;
   }
-  printf("instvars() ends\n");
+  //printf("instvars() ends\n");
 }
 TOKEN makeif(TOKEN tok, TOKEN exp, TOKEN thenpart, TOKEN elsepart) {
-  printf("makeif()\n");
+  //printf("makeif()\n");
   tok->tokentype = OPERATOR; /* Make it look like an operator   */
   tok->whichval = IFOP;
   if (elsepart != NULL) elsepart->link = NULL;
   thenpart->link = elsepart;
   exp->link = thenpart;
   tok->operands = exp;
-  if (DEBUG & DB_MAKEIF) {
+  if (DEBUG) {
     printf("makeif\n");
     dbugprinttok(tok);
     dbugprinttok(exp);
     dbugprinttok(thenpart);
     dbugprinttok(elsepart);
   };
-  printf("makeif() ends\n");
+  //printf("makeif() ends\n");
   return tok;
 }
 TOKEN makeprogn(TOKEN tok, TOKEN statements) {
-  printf("makeprogn()\n");
+  //printf("makeprogn()\n");
   tok->tokentype = OPERATOR;
   tok->whichval = PROGNOP;
   tok->operands = statements;
-  if (DEBUG & DB_MAKEPROGN) {
+  if (DEBUG) {
     printf("makeprogn\n");
     dbugprinttok(tok);
     dbugprinttok(statements);
   };
-  printf("makeprogn() ends\n");
+  //printf("makeprogn() ends\n");
   return tok;
 }
 TOKEN makelabel() {
-  printf("makelabel()\n");
+  //printf("makelabel()\n");
   TOKEN l = talloc();
   l->tokentype = OPERATOR;
   l->whichval = LABELOP;
   l->operands = makeintc(labelnumber);
   labelnumber += 1;
-  printf("makelabel() ends\n");
+  //printf("makelabel() ends\n");
   return l;
 }
 TOKEN makegoto(int label) {
-  printf("makegoto()\n");
+  //printf("makegoto()\n");
   TOKEN gotoTok = talloc();
   gotoTok->tokentype = OPERATOR;
   gotoTok->whichval = GOTOOP;
   gotoTok->operands = makeintc(labelnumber - 1);
-  printf("makegoto() ends\n");
+  //printf("makegoto() ends\n");
   return gotoTok;
 }
 TOKEN makefuncall(TOKEN tok, TOKEN fn, TOKEN args) {
-  printf("makefuncall() with args\n");
+  //printf("makefuncall() with args\n");
   ppexpr(args);
   tok->tokentype = OPERATOR;
   tok->whichval = FUNCALLOP;
@@ -311,20 +297,20 @@ TOKEN makefuncall(TOKEN tok, TOKEN fn, TOKEN args) {
   fn->link = args;
   tok->operands = fn;
 
-  printf("makefuncall() ends\n");
+  //printf("makefuncall() ends\n");
   return tok;
 }
 TOKEN makeintc(int num) {
-  printf("makeintc()\n");
+  //printf("makeintc()\n");
   TOKEN intMade = talloc();
   intMade->tokentype = NUMBERTOK;
   intMade->datatype = INTEGER;
   intMade->intval = num;
-  printf("makeintc() ends\n");
+  //printf("makeintc() ends\n");
   return intMade;
 }
 TOKEN makeprogram(TOKEN name, TOKEN args, TOKEN statements) {
-  printf("makeprogram() with args:\n\t");
+  //printf("makeprogram() with args:\n\t");
   ppexpr(args);
   TOKEN program = talloc();
   TOKEN tmpArgs = talloc();
@@ -336,118 +322,110 @@ TOKEN makeprogram(TOKEN name, TOKEN args, TOKEN statements) {
   name->link = tmpArgs;
   tmpArgs->link = statements;
   
-  printf("makeprogram() ends\n");
+  //printf("makeprogram() ends\n");
 
   return program;
 }
 TOKEN makefor(int sign, TOKEN tok, TOKEN asg, TOKEN tokb, TOKEN endexpr,
   TOKEN tokc, TOKEN statement) {
 
-  printf("makefor() with statement\n");
-  ppexpr(statement);
+  //printf("makefor()\n\t");
+
   tok->tokentype = OPERATOR;
   tok->whichval = PROGNOP;
   tok->operands = asg;
 
   tokb->tokentype = OPERATOR;
   tokb->whichval = LABELOP;
-
   asg->link=tokb;
   
-  //int
-  TOKEN toki = talloc();
-  toki->tokentype = NUMBERTOK;
-  toki->datatype = INTEGER;
+  TOKEN tok1 = talloc();
+  tok1->tokentype = NUMBERTOK;
+  tok1->datatype = INTEGER;
   int lbl = labelnumber++;
-  toki->intval = lbl;
-  tokb->operands = toki;
+  tok1->intval = lbl; 
+  tokb->operands = tok1;
   
   tokc->tokentype = OPERATOR;
   tokc->whichval = IFOP;
-  
   tokb->link = tokc;
   
-  TOKEN tokj = talloc();
-  tokj->tokentype = OPERATOR;
-  tokj->whichval = LEOP;
-  tokc->operands = tokj;
-  
-  TOKEN tokl = talloc();
-  tokl->tokentype = asg->operands->tokentype;
-  strcpy (tokl->stringval,asg->operands->stringval);
-  tokl->link = endexpr;
-  
-  tokj->operands = tokl;
-  
-  TOKEN tokm = talloc();
-  tokm->tokentype = OPERATOR;
-  tokm->whichval = PROGNOP;
-  tokj->link = tokm;
-  tokm->operands = statement;
-  
-  //:=
-  TOKEN tokn = talloc();
-  tokn->tokentype = OPERATOR;
-  tokn->whichval = ASSIGNOP;
-  statement->link = tokn;
-  
-  TOKEN toko = talloc();
-  toko->tokentype = asg->operands->tokentype;
-  
-  strcpy (toko->stringval,asg->operands->stringval);
-  tokn->operands = toko;
-  
-  //i to +
-  TOKEN tokp = talloc();
-  tokp->tokentype = OPERATOR;
-  tokp->whichval = PLUSOP;
-  toko->link = tokp;
-  
-  //+ to i
-  TOKEN tokq = talloc();
-  tokq->tokentype = asg->operands->tokentype;
-  strcpy (tokq->stringval,asg->operands->stringval);
-  tokp->operands = tokq;
-  
-  //i to 1
-  TOKEN tokr = talloc();
-  tokr->tokentype = NUMBERTOK;
-  tokr->datatype = INTEGER;
-  tokr->intval = 1;
-  tokq->link = tokr;
-  printf("linked i and 1 \n");
-  
-  //tokn link to goto
-  TOKEN toks = talloc();
-  toks->tokentype = OPERATOR;
-  toks->whichval = GOTOOP;
-  toks->link = toks;
-  
-  TOKEN tokt = talloc();
-  tokt->tokentype = NUMBERTOK;
-  tokt->datatype = INTEGER;
-  tokt->intval = lbl;
-  
-  toks->operands = tokm;
-  
-  if (DEBUG)
-  { printf("makefor\n");
-      dbugprinttok(tok);
-      dbugprinttok(asg);
-      dbugprinttok(tokb);
-      dbugprinttok(endexpr);
-      dbugprinttok(tokc);
-      dbugprinttok(statement);
-  };
+  TOKEN tok2 = talloc();
+  tok2->tokentype = OPERATOR;
+  tok2->whichval = LEOP;
+  tokc->operands = tok2;
 
-  printf("makefor() ends with tokens\n");
-  ppexpr(tok);
+  TOKEN tok3 = talloc();
+  tok3->tokentype = asg->operands->tokentype;
+  strcpy (tok3->stringval,asg->operands->stringval);
+  tok3->link = endexpr;
+  
+  tok2->operands = tok3;
+  
+  TOKEN tok4 = talloc();
+  tok4->tokentype = OPERATOR;
+  tok4->whichval = PROGNOP;
+  tok2->link = tok4;
+  
+  tok4->operands = statement;
+
+  TOKEN tok5 = talloc();
+  tok5->tokentype = OPERATOR;
+  tok5->whichval = ASSIGNOP;
+  statement->link = tok5;
+
+  TOKEN tok6 = talloc();
+  tok6->tokentype = asg->operands->tokentype;
+  
+  strcpy (tok6->stringval,asg->operands->stringval);
+  tok5->operands = tok6;
+  
+  TOKEN tok7 = talloc();
+  tok7->tokentype = OPERATOR;
+  tok7->whichval = PLUSOP;
+  tok6->link = tok7;
+
+  TOKEN tok8 = talloc();
+  tok8->tokentype = asg->operands->tokentype;
+  strcpy (tok8->stringval,asg->operands->stringval);
+  tok7->operands = tok8;
+
+  TOKEN tok9 = talloc();
+  tok9->tokentype = NUMBERTOK;
+  tok9->datatype = INTEGER;
+  tok9->intval = 1;
+  tok8->link = tok9;
+
+  TOKEN tokA = talloc();
+  tokA->tokentype = OPERATOR;
+  tokA->whichval = GOTOOP;
+  tok5->link = tokA;
+
+  TOKEN tokB = talloc();
+  tokB->tokentype = NUMBERTOK;
+  tokB->datatype = INTEGER;
+  tokB->intval = lbl;
+  
+  tokA->operands = tokB;
+  
+  if (DEBUG){ 
+    printf("makefor\n");
+    dbugprinttok(tok);
+    dbugprinttok(asg);
+    dbugprinttok(tokb);
+    dbugprinttok(endexpr);
+    dbugprinttok(tokc);
+    dbugprinttok(statement);
+  };
+  ppexpr(tok); 
+  //printf("makefor() ends\n");
   return tok;
+
 }
 TOKEN findtype(TOKEN tok) {
-  printf("findtype()\n");
+  //printf("findtype()\n");
   tok -> symtype = searchst(tok -> tokenval.tokenstring);
-  printf("findtype() ends\n");
+  //printf("findtype() ends\n");
   return tok;
 }
 int wordaddress(int n, int wordsize) {
@@ -466,7 +444,7 @@ main() {
   res = yyparse();
   printst();
   printf("yyparse result = %8d\n", res);
-  if (DEBUG & DB_PARSERES) 
+  if (DEBUG) 
     dbugprinttok(parseresult);
   ppexpr(parseresult); /* Pretty-print the result tree */
 }
